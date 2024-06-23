@@ -8,11 +8,16 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kowshik.location.entities.Location;
+import com.kowshik.location.repos.LocationRepository;
 import com.kowshik.location.service.LocationService;
 import com.kowshik.location.util.EmailUtil;
+import com.kowshik.location.util.ReportUtil;
+
+import jakarta.servlet.ServletContext;
 
 @Controller
 public class LocationController {
@@ -21,7 +26,16 @@ public class LocationController {
 	LocationService service;
 	
 	@Autowired
+	LocationRepository repository;
+	
+	@Autowired
 	EmailUtil emailUtil;
+	
+	@Autowired
+	ReportUtil reportUtil;
+	
+	@Autowired
+	ServletContext sc;
 	
 	@GetMapping("/showCreate")
 	String showCreate() {
@@ -70,4 +84,13 @@ public class LocationController {
 		
 		return "displayLocations";
 	}
+	
+	@RequestMapping("/generateReport")
+	public String generateReport() {
+		String path = sc.getRealPath("/");
+		List<Object[]> data = repository.findTypeAndTypeCount();
+		reportUtil.generatePieChart(path, data);
+		return "report";
+	}
+	
 }
